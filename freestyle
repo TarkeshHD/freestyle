@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+
+    tools {
+        // Use the configured Maven version in Jenkins
+        maven 'Maven 3.x'  // Adjust this to match the Maven name in Global Tool Configuration
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clone the repository
+                git branch: 'main', url: 'https://github.com/your-repo/sample-maven-project.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Run Maven build with clean and install goals
+                script {
+                    // Check if the Maven executable exists
+                    if (isUnix()) {
+                        sh 'mvn --version'
+                    } else {
+                        bat 'mvn --version'
+                    }
+                }
+                // Run the Maven build commands
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Run the Maven test phase to execute tests
+                sh 'mvn test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                // Package the application (for example, into a JAR or WAR file)
+                sh 'mvn package'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build completed successfully.'
+        }
+        failure {
+            echo 'Build failed.'
+        }
+    }
+}
